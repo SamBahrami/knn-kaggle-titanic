@@ -2,7 +2,7 @@ data:
   train: "./data/train.csv"
   test: "./data/test.csv"
 knn_features:
-  features: ["Sex", "Pclass", "Age", "Fare"]
-  text_features: ["Sex"]
+  features: ["Sex", "Pclass", "Age", "Fare", "SibSp", "Parch", "Embarked"]
+  text_features: ["Sex", "Embarked"]
 knn:
-  k: 5
+  k: 10

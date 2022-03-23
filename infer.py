@@ -1,8 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from yaml import safe_load
-from typing import List
 import numpy as np
+
+
+def take_first(elem):
+    return elem[0]
 
 
 class knn:
@@ -20,21 +23,28 @@ class knn:
     def infer(self, datapoint):
         # raw_datapoint = np.array(datapoint[self.data_columns])
         raw_datapoint = datapoint
-        min_distance = 10000.0
-        target = 0
+        closest_k_distances = []
         for i, raw_train_data in enumerate(self.train_data):
             distance = self._distance(raw_datapoint, raw_train_data)
-            if distance < min_distance:
-                min_distance = distance
-                target = self.train_targets[i]
-            # update
-        return target
+            closest_k_distances.sort(key=take_first)
+            if len(closest_k_distances) < self.k:
+                closest_k_distances.append((distance, self.train_targets[i]))
+                continue
+            if distance < closest_k_distances[-1][0]:
+                closest_k_distances[-1] = (distance, self.train_targets[i])
+        sum_of_targets = 0
+        for item in closest_k_distances:
+            sum_of_targets += item[1]
+        if sum_of_targets < (self.k / 2.0):
+            return 0
+        return 1
 
 
 def load_datasets(data_params, knn_features):
     train_data = pd.read_csv(data_params["train"])
     train_data = train_data[knn_features + ["Survived"]]
     # For simplicity
+    train_data["Age"].fillna(train_data["Age"].mean(), inplace=True)
     train_data.dropna(inplace=True)
     train_target = train_data["Survived"]
     train_data = train_data[knn_features]
@@ -70,12 +80,12 @@ def display_train_data(train, targets):
         ax.scatter(
             current_class_data["Age"],
             current_class_data["Fare"],
-            current_class_data["Sex"] * current_class_data["Pclass"],
+            *current_class_data["Age"] * current_class_data["Pclass"],
             marker=markers[i % len(markers)],
         )
     ax.set_xlabel("Age")
     ax.set_ylabel("Fare")
-    ax.set_zlabel("Sex*Pclass")
+    ax.set_zlabel("Pclass*Age")
     plt.show()
 
 
