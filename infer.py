@@ -8,7 +8,7 @@ import numpy as np
 class knn:
     def __init__(self, train, target, params):
         self.train_data = train
-        self.data_columns = list(train.columns)
+        # self.data_columns = list(train.columns)
         self.train_targets = target
         self.k = params["k"]
 
@@ -18,11 +18,11 @@ class knn:
         return dist
 
     def infer(self, datapoint):
-        raw_datapoint = np.array(datapoint[self.data_columns])
+        # raw_datapoint = np.array(datapoint[self.data_columns])
+        raw_datapoint = datapoint
         min_distance = 10000.0
         target = 0
-        for i, row in self.train_data.iterrows():
-            raw_train_data = np.array(row)
+        for i, raw_train_data in enumerate(self.train_data):
             distance = self._distance(raw_datapoint, raw_train_data)
             if distance < min_distance:
                 min_distance = distance
@@ -79,6 +79,10 @@ def display_train_data(train, targets):
     plt.show()
 
 
+def convert_data_to_numpy(train, test, target):
+    return np.array(train), np.array(test), np.array(target)
+
+
 with open("params.yml", "r") as file:
     params = safe_load(file)
 
@@ -93,9 +97,11 @@ for textual_feature in knn_params["text_features"]:
 train, test = normalize_df_columns(train, test)
 display_train_data(train, target)
 
+train, test, target = convert_data_to_numpy(train, test, target)
 knn_model = knn(train, target, params["knn"])
 results = []
-for _, row in test.iterrows():
+
+for row in test:
     results.append(knn_model.infer(row))
 raw_test["Survived"] = results
 raw_test[["PassengerId", "Survived"]].to_csv("Solution.csv", index=False)
