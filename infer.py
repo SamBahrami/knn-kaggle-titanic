@@ -80,7 +80,7 @@ def display_train_data(train, targets):
         ax.scatter(
             current_class_data["Age"],
             current_class_data["Fare"],
-            *current_class_data["Age"] * current_class_data["Pclass"],
+            current_class_data["Age"] * current_class_data["Pclass"],
             marker=markers[i % len(markers)],
         )
     ax.set_xlabel("Age")
